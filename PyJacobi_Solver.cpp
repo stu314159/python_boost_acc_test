@@ -101,7 +101,21 @@ void PyJacobi_Solver::solve()
 } 
    if (nIter > 2)
     {
-      rel_update = rel_error(u,u_new);
+  //    rel_update = rel_error(u,u_new);
+  //   refactor to put calculation in this function
+  //
+      double normUpdate = 0.;
+      for(int i=1; i<(N-1);i++){
+        normUpdate+=(u[i] - u_new[i])*(u[i] - u_new[i]);
+      }
+
+      double normU = 0.;
+      for(int i=1; i<(N-1);i++){
+
+        normU+=u_new[i]*u_new[i];
+      }
+
+      rel_update = normUpdate/normU;
     }
     if ((rel_update < tolerance) || (nIter == maxIter)) {
       KEEP_GOING = false;
