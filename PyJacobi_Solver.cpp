@@ -75,7 +75,7 @@ void PyJacobi_Solver::solve()
   bool KEEP_GOING = true;
   double * u; double * u_new;
   double rel_update = 1.;
-
+//#pragma acc data copyin(u[0:N],u_new[0:N])
   while(KEEP_GOING)
   {
     nIter++; //increment iteration counter
@@ -85,6 +85,7 @@ void PyJacobi_Solver::solve()
     }else{
       u = u_odd; u_new = u_even;
     }
+#pragma acc kernels
     for(int i = 1; i<(N-1); i++){ //iterate through all points
       u_new[i] = 0.5*(u[i-1]+u[i+1] - rhs);
     }
