@@ -1,6 +1,7 @@
 #include "PyJacobi_Solver.h"
 #include <math.h>
 #include <iostream>
+#include "WorkArounds.h"
 
 PyJacobi_Solver::PyJacobi_Solver(const int N) :
 u_out(NULL), u_even(NULL), u_odd(NULL), N(N), maxIter(0),
@@ -60,7 +61,8 @@ double PyJacobi_Solver::rel_error(const double * u, const double * u_new)
 {
   double norm_err = 0.; //initialize the error norm
   double norm_u = 0.; //initialize the vector norm
-  for(int i = 0; i<N; i++){
+#pragma acc data update host(u_odd,u_even) 
+ for(int i = 0; i<N; i++){
     norm_err+=(u[i] - u_new[i])*(u[i] - u_new[i]);
     norm_u+=u_new[i]*u_new[i];
   }
@@ -75,7 +77,13 @@ void PyJacobi_Solver::solve()
   bool KEEP_GOING = true;
   double * u; double * u_new;
   double rel_update = 1.;
-//#pragma acc data copyin(u[0:N],u_new[0:N])
+
+  double * u_even = this->u_even;
+  double * u_odd = this->u_odd;
+  int N = this->N;
+
+  dummyUse(N);
+#pragma acc data copyin(u_even[0:N],u_odd[0:N])
   while(KEEP_GOING)
   {
     nIter++; //increment iteration counter
@@ -86,10 +94,12 @@ void PyJacobi_Solver::solve()
       u = u_odd; u_new = u_even;
     }
 #pragma acc kernels
+{ 
     for(int i = 1; i<(N-1); i++){ //iterate through all points
       u_new[i] = 0.5*(u[i-1]+u[i+1] - rhs);
     }
-    if (nIter > 2)
+} 
+   if (nIter > 2)
     {
       rel_update = rel_error(u,u_new);
     }

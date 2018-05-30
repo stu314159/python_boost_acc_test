@@ -16,17 +16,17 @@ EXT=cpp
 
 # GNU tools
 #MPI_CC=g++
-#MPI_FLAGS=-std=c++11 -O3 -Wall -fPIC
-#MPI_FLAGS2=-std=c++11 -shared -Wl,--export-dynamic 
+#MPI_FLAGS=-std=c++11 -O3 -Wall -fPIC -ta:nvidia:nordc
+#MPI_FLAGS2=-std=c++11 -shared -Wl,--export-dynamic -ta:nvidia:nordc
 
 #PGI tools
 MPI_CC=pgc++
-MPI_FLAGS=-std=c++11 -acc -Minfo=acc
-MPI_FLAGS2=-std=c++11 -shared -Wl,--export-dynamic
+MPI_FLAGS=-std=c++11 -acc -Minfo=acc -ta=nvidia:nordc
+MPI_FLAGS2=-std=c++11 -shared -Wl,--export-dynamic -ta=nvidia:nordc
 
 
-SOURCES= PyJacobi_Solver.cpp
-OBJECTS= 
+SOURCES= PyJacobi_Solver.cpp WorkArounds.cpp
+OBJECTS= WorkArounds.o 
 	 
 
 $(FILE).so: $(FILE).o $(OBJECTS)
